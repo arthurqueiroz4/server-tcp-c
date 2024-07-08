@@ -14,4 +14,7 @@ waitingForAccept(int fd);
 void
 handleConnection(int fd);
 
+void*
+handleThreadableConnection(void *args);
+
 #endif //SERVER_H

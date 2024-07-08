@@ -1,6 +1,8 @@
 //
 // Created by arthur on 07/07/24.
 //
+#include "server.h"
+
 #include <stdio.h>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -67,6 +69,12 @@ int waitingForAccept(int const sockfd) {
     printf("Server accept the client...\n");
 
     return connfd;
+}
+
+void *handleThreadableConnection(void *args) {
+    int* connfd = args;
+    handleConnection(*connfd);
+    return NULL;
 }
 
 void handleConnection(int const connfd) {
