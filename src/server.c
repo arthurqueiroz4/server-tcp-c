@@ -3,6 +3,7 @@
 //
 #include "server.h"
 
+#include <arpa/inet.h>
 #include <stdio.h>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -58,16 +59,28 @@ int setupServerTCP() {
     return sockfd;
 }
 
+void showClientInfo(struct sockaddr_in *client) {
+    char *ip_str = malloc(INET_ADDRSTRLEN);
+
+    inet_ntop(AF_INET, &(client->sin_addr), ip_str, INET_ADDRSTRLEN);
+
+    int port = ntohs(client->sin_port);
+
+    printf("\nClient IP: %s\n", ip_str);
+    printf("Client Port: %d\n\n", port);
+    free(ip_str);
+}
+
 int waitingForAccept(int const sockfd) {
     struct sockaddr_in client;
     int lenClient = sizeof(client);
-    const int connfd = accept(sockfd, (SA*)&client, &lenClient);
+    const int connfd = accept(sockfd, (SA *) &client, &lenClient);
     if ( connfd < 0 ) {
         printf("Server accept failed...\n");
         exit(1);
     }
     printf("Server accept the client...\n");
-
+    showClientInfo(&client);
     return connfd;
 }
 
@@ -99,4 +112,8 @@ void handleConnection(int const connfd) {
             break;
         }
     }
+}
+
+void closeServer() {
+
 }
