@@ -113,7 +113,3 @@ void handleConnection(int const connfd) {
         }
     }
 }
-
-void closeServer() {
-
-}
