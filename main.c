@@ -1,8 +1,10 @@
-#include "src/server.h"
 #include <pthread.h>
+#include <stdlib.h>
 
+#include "src/server.h"
 #include "src/signalHandler.h"
 #include "src/broadcast.h"
+#include "src/utils.h"
 
 int main(void) {
     int const sockfd = setupServerTCP();
@@ -12,8 +14,12 @@ int main(void) {
 
     Broadcast *broadcast = newBroadcast();
 
+    ParamsForThread params;
+    params.broadcast = broadcast;
+
     for (;;) {
         int connfd = waitingForAccept(sockfd, broadcast);
-        pthread_create(&thread_id, NULL, handleThreadableConnection, &connfd);
+        params.connfd = connfd;
+        pthread_create(&thread_id, NULL, handleThreadableConnection, &params);
     }
 }

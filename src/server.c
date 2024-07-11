@@ -12,9 +12,6 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include "utils.h"
-#define MAX 80
-#define PORT 8080
-#define SA struct sockaddr
 
 int createSocketTCP() {
     int const sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -60,14 +57,6 @@ int setupServerTCP() {
     return sockfd;
 }
 
-void showClientInfo(struct sockaddr_in *client) {
-    char *ip_str = convertIPToString(client->sin_addr);
-    int port = ntohs(client->sin_port);
-    printf("Client IP: %s\n", ip_str);
-    printf("Client Port: %d\n\n", port);
-    free(ip_str);
-}
-
 int waitingForAccept(int const sockfd, Broadcast *broadcast) {
     struct sockaddr_in client;
     int lenClient = sizeof(client);
@@ -89,20 +78,22 @@ int waitingForAccept(int const sockfd, Broadcast *broadcast) {
 }
 
 void *handleThreadableConnection(void *args) {
-    int* connfd = args;
-    handleConnection(*connfd);
+    ParamsForThread *params = (ParamsForThread *) args;
+    int connfd = params->connfd;
+    Broadcast* broadcast = params->broadcast;
+    handleConnection(connfd, broadcast);
     return NULL;
 }
 
-void handleConnection(int const connfd) {
+void handleConnection(int const connfd, Broadcast *broadcast) {
     char buff[MAX];
 
     for(;;) {
         memset(buff, 0, MAX);
         recv(connfd, buff, MAX, 0);
         printf("From client: %s\n", buff);
+        broadcastMessage(broadcast, buff, connfd);
         memset(buff, 0, MAX);
-        //broadcastMessage(broadcast, buff, sizeof(buff));
         if (strncmp("exit", buff, 4) == 0) {
             printf("Server Exit...\n");
             break;

@@ -4,10 +4,13 @@
 
 #include "broadcast.h"
 
+#include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "utils.h"
+#include <unistd.h>
+#define MAX_CLIENTS 100
 
 Broadcast *newBroadcast() {
     Broadcast *broadcast = malloc(sizeof(Broadcast));
@@ -43,12 +46,17 @@ int removeClient(Broadcast *broadcast, struct sockaddr_in clientAddr) {
 }
 
 void broadcastMessage(Broadcast *broadcast, const char *message, int from_fd) {
+    printf("Broadcast message started...\n");
     for (int i = 0; i < broadcast->count; i++) {
         Client currentClient = broadcast->clients[i];
-        if (currentClient.conn_fd == from_fd)
+        if (currentClient.conn_fd == from_fd) {
             continue;
-
-        send(currentClient.conn_fd, message, sizeof(message), 0);
+        }
+        ssize_t sent_bytes = send(currentClient.conn_fd, message, strlen(message), 0);
+        if (sent_bytes == -1) {
+            perror("Failed to send message");
+            close(currentClient.conn_fd);
+        }
     }
 }
 
@@ -56,7 +64,7 @@ void showDetails(Broadcast *broadcast) {
     printf("Clients in broadcast: \n");
     for (int i=0; i<broadcast->count; i++) {
         Client client = broadcast->clients[i];
-        printf("%s:%d\n", convertIPToString(client.address.sin_addr), client.address.sin_port);
+        printf("%s:%d\n", convertIPToString(client.address.sin_addr), ntohs(client.address.sin_port));
     }
     printf("Total: %d\n\n", broadcast->count);
 }

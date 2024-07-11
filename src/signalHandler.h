@@ -6,6 +6,10 @@
 #define HANDLESIGNAL_H
 
 #include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <pthread.h>
 
 // Função para inicializar a thread de tratamento de sinais
 void setupSignalHandler(int server_fd);

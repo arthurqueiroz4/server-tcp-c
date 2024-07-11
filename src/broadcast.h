@@ -4,20 +4,17 @@
 
 #ifndef BROADCAST_H
 #define BROADCAST_H
-
 #include <netinet/in.h>
 
-#define MAX_CLIENTS 100
-
-struct Client {
+typedef struct {
     struct sockaddr_in address;
     int conn_fd;
-} typedef Client;
+} Client;
 
-struct Broadcast {
+typedef struct {
     Client *clients;
     int count;
-} typedef Broadcast;
+} Broadcast;
 
 Broadcast *
 newBroadcast();
@@ -32,7 +29,7 @@ void
 broadcastMessage(Broadcast *broadcast, const char *message, int from_fd);
 
 void
- showDetails(Broadcast *broadcast);
+showDetails(Broadcast *broadcast);
 
 
 #endif // BROADCAST_H

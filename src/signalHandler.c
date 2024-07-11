@@ -2,10 +2,6 @@
 // Created by arthur on 08/07/24.
 //
 #include "signalHandler.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <pthread.h>
 
 static int server_fd; // Descritor de arquivo do servidor
 
