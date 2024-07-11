@@ -2,6 +2,7 @@
 #include <pthread.h>
 
 #include "src/signalHandler.h"
+#include "src/broadcast.h"
 
 int main(void) {
     int const sockfd = setupServerTCP();
@@ -9,8 +10,10 @@ int main(void) {
 
     setupSignalHandler(sockfd);
 
+    Broadcast *broadcast = newBroadcast();
+
     for (;;) {
-        int connfd = waitingForAccept(sockfd);
+        int connfd = waitingForAccept(sockfd, broadcast);
         pthread_create(&thread_id, NULL, handleThreadableConnection, &connfd);
     }
 }

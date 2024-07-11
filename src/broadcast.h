@@ -11,6 +11,7 @@
 
 struct Client {
     struct sockaddr_in address;
+    int conn_fd;
 } typedef Client;
 
 struct Broadcast {
@@ -22,12 +23,16 @@ Broadcast *
 newBroadcast();
 
 int
-addClient(Broadcast *broadcast, struct sockaddr_in client_address);
+addClient(Broadcast *broadcast, struct sockaddr_in client_address, int conn_fd);
 
 int
 removeClient(Broadcast *broadcast, struct sockaddr_in clientAddr);
 
 void
-broadcastMessage(Broadcast *broadcast, int sender_fd, const char *message);
+broadcastMessage(Broadcast *broadcast, const char *message, int from_fd);
+
+void
+ showDetails(Broadcast *broadcast);
+
 
 #endif // BROADCAST_H

@@ -11,6 +11,7 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include "utils.h"
 #define MAX 80
 #define PORT 8080
 #define SA struct sockaddr
@@ -60,18 +61,14 @@ int setupServerTCP() {
 }
 
 void showClientInfo(struct sockaddr_in *client) {
-    char *ip_str = malloc(INET_ADDRSTRLEN);
-
-    inet_ntop(AF_INET, &(client->sin_addr), ip_str, INET_ADDRSTRLEN);
-
+    char *ip_str = convertIPToString(client->sin_addr);
     int port = ntohs(client->sin_port);
-
-    printf("\nClient IP: %s\n", ip_str);
+    printf("Client IP: %s\n", ip_str);
     printf("Client Port: %d\n\n", port);
     free(ip_str);
 }
 
-int waitingForAccept(int const sockfd) {
+int waitingForAccept(int const sockfd, Broadcast *broadcast) {
     struct sockaddr_in client;
     int lenClient = sizeof(client);
     const int connfd = accept(sockfd, (SA *) &client, &lenClient);
@@ -79,8 +76,15 @@ int waitingForAccept(int const sockfd) {
         printf("Server accept failed...\n");
         exit(1);
     }
-    printf("Server accept the client...\n");
+    printf("Server accept the client:\n");
     showClientInfo(&client);
+
+    if (addClient(broadcast, client, connfd) == -1) {
+        char *ip_str = malloc(INET_ADDRSTRLEN);
+        inet_ntop(AF_INET, &(client.sin_addr), ip_str, INET_ADDRSTRLEN);
+        printf("It wasn't possible to add client from %s to broadcast", ip_str);
+    }
+
     return connfd;
 }
 
@@ -95,18 +99,10 @@ void handleConnection(int const connfd) {
 
     for(;;) {
         memset(buff, 0, MAX);
-
         recv(connfd, buff, MAX, 0);
-
-        printf("From client: %s\t To client: ", buff);
+        printf("From client: %s\n", buff);
         memset(buff, 0, MAX);
-
-        int n = 0;
-        while ((buff[n++] = getchar()) != '\n')
-            ;
-
-        send(connfd, buff, sizeof(buff), 0);
-
+        //broadcastMessage(broadcast, buff, sizeof(buff));
         if (strncmp("exit", buff, 4) == 0) {
             printf("Server Exit...\n");
             break;
